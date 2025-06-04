@@ -1,16 +1,21 @@
 import tkinter as tk
 import random
+from PIL import Image, ImageTk
 
 root = tk.Tk()
-root.geometry('1000x500')
+root.geometry('1000x800')
 root.title('Виселица')
 
-possible_variant = ['pepsi', 'spongebob', 'apple', 'dead']
+possible_variant = ['pepsi', 'spongebob', 'apple', 'dead', 'cat', 'island', 'philosophy', 'moon', 'electricity', 'sun',
+                    'book', 'revolution', 'tree', 'ocean', 'universe', 'pen', 'harmony', 'ghost', 'mountain']
+
+images = [ImageTk.PhotoImage(Image.open(f"gallow{i}.png")) for i in range(11)]
 
 attempt = 10
 gameover = False
 word = random.choice(possible_variant)
 user = []
+wrong_letters = []
 buttons = []
 
 hellotext = tk.Label(root, text='Hello, This is Gallows!', font=('Arial', 15))
@@ -35,6 +40,9 @@ label3.pack(padx=10, pady=5)
 
 guessed_label = tk.Label(root, text='Угаданные буквы: ', font=('Arial', 10))
 guessed_label.pack(padx=10, pady=5)
+
+wrong_label = tk.Label(root, text='Использованные буквы: ', font=('Arial', 10))
+wrong_label.pack(padx=10, pady=5)
 
 # Кнопка начать снова
 startagain_button = tk.Button(root, text='Начать снова', font=('Arial', 15), command=lambda: reset_game())
@@ -62,10 +70,15 @@ def input_all():
                 buttons[i].config(text=letter)
     elif user_let in user:
         ans.config(text='Эта буква уже угадана!', fg='orange')
+    elif user_let in wrong_letters:
+        ans.config(text='Вы уже пробовали эту букву!', fg='orange')
     else:
+        wrong_letters.append(user_let)
         ans.config(text='Не угадали!', fg='red')
         attempt -= 1
         label3.config(text=str(attempt))
+        image_label.config(image=images[10 - attempt])
+        wrong_label.config(text='Использованные буквы: ' + ', '.join(wrong_letters))
 
     guessed_label.config(text='Угаданные буквы: ' + ', '.join(user))
     user_input.delete(0, tk.END)
@@ -91,17 +104,23 @@ button1.pack(padx=10, pady=10)
 # Нажатие Enter = OK
 user_input.bind('<Return>', lambda event: input_all())
 
+image_label = tk.Label(root, image=images[0])
+image_label.pack(padx=10, pady=5)
+
+
 
 # Перезапуск игры
 def reset_game():
-    global attempt, user, gameover, word, buttons
+    global attempt, user, gameover, word, buttons, wrong_letters
     attempt = 10
     user = []
+    wrong_letters = []
     gameover = False
     word = random.choice(possible_variant)
     ans.config(text='', fg='black')
     label3.config(text=str(attempt))
     guessed_label.config(text='Угаданные буквы: ')
+    wrong_label.config(text='Использованные буквы: ')
     user_input.config(state='normal')
     user_input.delete(0, tk.END)
 
@@ -116,8 +135,10 @@ def reset_game():
         btn.grid(row=0, column=index, padx=2, pady=2)
         buttons.append(btn)
 
-    # Спрятать кнопку "начать снова"
     startagain_button.pack_forget()
+
+    #Очищяем рисуночки человечка
+    image_label.config(image=images[0])
 
 reset_game()
 
